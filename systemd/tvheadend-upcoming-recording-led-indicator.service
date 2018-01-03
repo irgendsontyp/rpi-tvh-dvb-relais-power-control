@@ -1,0 +1,14 @@
+[Unit]
+Description=Lights up an LED to indicate whether there are upcoming or running recording entries in tvheadend
+After=tvheadend.service
+Requisite=tvheadend.service
+
+[Service]
+ExecStart=/usr/bin/env python3 /usr/local/bin/tvheadend-upcoming-recording-led-indicator.py
+User=tvh-led
+
+[Install]
+WantedBy=multi-user.target
+
+
+
