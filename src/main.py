@@ -16,8 +16,8 @@ TVHEADEND_OTA_EPG_LAST_TRIGGER_TIMESTAMP_FORMAT = "%d.%m.%Y %H:%M:%S"
 config = configparser.ConfigParser()
 config.read("/etc/tvheadend-upcoming-recording-led-indicator/tvheadend-upcoming-recording-led-indicator.conf")
 
-GPIO_PIN_BLUE_LED = config["gpio"].getint("pin_number_blue_led")
-GPIO_PIN_RED_LED = config["gpio"].getint("pin_number_red_led")
+GPIO_PIN_DVB_DEVICE_REQUIRED_LED = config["gpio"].getint("pin_number_dvb_device_required_led")
+GPIO_PIN_ERROR_LED = config["gpio"].getint("pin_number_error_led")
 
 TVHEADEND_URL = config["tvheadend-api"]["url"]
 TVHEADEND_USERNAME = config["tvheadend-api"]["username"]
@@ -35,11 +35,11 @@ event = threading.Event()
 def logErrorAndLightUpErrorLED(errorMessage):
 	logging.error(errorMessage)
 	
-	GPIO.output(GPIO_PIN_RED_LED, GPIO.HIGH)
+	GPIO.output(GPIO_PIN_ERROR_LED, GPIO.HIGH)
 	
 	
 def indicateDvbDeviceRequired(isRequired):
-	GPIO.output(GPIO_PIN_BLUE_LED, GPIO.HIGH if isRequired else GPIO.LOW)
+	GPIO.output(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.HIGH if isRequired else GPIO.LOW)
 
 
 def setupLogger():
@@ -164,22 +164,22 @@ def checkForUpcomingOrRunningRecordings():
 	
 class GPIOCleanup():
 	def __enter__(self):
-		logging.info("Setting up GPIOs. Blue LED is assigned to pin " + str(GPIO_PIN_BLUE_LED) + ", red LED is assigned to pin " + str(GPIO_PIN_RED_LED))
+		logging.info("Setting up GPIOs. DVB device required indicator LED is assigned to pin " + str(GPIO_PIN_DVB_DEVICE_REQUIRED_LED) + ", error indicator LED is assigned to pin " + str(GPIO_PIN_ERROR_LED))
 	
 		GPIO.setmode(GPIO.BOARD)
 
-		GPIO.setup(GPIO_PIN_BLUE_LED, GPIO.OUT)
-		GPIO.setup(GPIO_PIN_RED_LED, GPIO.OUT)	
+		GPIO.setup(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.OUT)
+		GPIO.setup(GPIO_PIN_ERROR_LED, GPIO.OUT)	
 		
-		GPIO.output(GPIO_PIN_BLUE_LED, GPIO.LOW)
-		GPIO.output(GPIO_PIN_RED_LED, GPIO.LOW)
+		GPIO.output(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.LOW)
+		GPIO.output(GPIO_PIN_ERROR_LED, GPIO.LOW)
 
 		logging.info("Finished setting up GPIOs")
 		
 	
 	def __exit__(self, exc_type, exc_val, exc_tb):
-		GPIO.output(GPIO_PIN_BLUE_LED, GPIO.LOW)
-		GPIO.output(GPIO_PIN_RED_LED, GPIO.LOW)
+		GPIO.output(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.LOW)
+		GPIO.output(GPIO_PIN_ERROR_LED, GPIO.LOW)
 		GPIO.cleanup()
 	
 	
