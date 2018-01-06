@@ -149,13 +149,18 @@ def checkForUpcomingOrRunningRecordings():
 				
 				entryName = entry["title"]["ger"]
 
-	if (not dvbDeviceRequired and minDate is not None):
-		timeDifferenceFromNowToNextEvent = minDate - datetime.datetime.now()
-		
-		if (timeDifferenceFromNowToNextEvent.total_seconds() <= MAX_SECONDS_UPCOMING_RECORDING):	
-			logging.info("There is an upcoming recording within the next " + str(MAX_SECONDS_UPCOMING_RECORDING) + " seconds: \"" + entryName + "\"")
+	if (not dvbDeviceRequired):
+		if (minDate is not None):
+			timeDifferenceFromNowToNextEvent = minDate - datetime.datetime.now()
 			
-			dvbDeviceRequired = True
+			if (timeDifferenceFromNowToNextEvent.total_seconds() <= MAX_SECONDS_UPCOMING_RECORDING):	
+				logging.info("There is an upcoming recording within the next " + str(MAX_SECONDS_UPCOMING_RECORDING) + " seconds: \"" + entryName + "\"")
+				
+				dvbDeviceRequired = True
+			else:
+				logging.info("The next upcoming recording is \"" + entryName + "\" which will start in " + str(int(timeDifferenceFromNowToNextEvent.total_seconds())) + " seconds, which is too far in the future")
+		else:
+			logging.info("There are no enabled recording entries")
 			
 	logging.info("Indicating that the DVB device is " + ("required" if dvbDeviceRequired else "not required"))
 			
