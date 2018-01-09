@@ -10,13 +10,13 @@ import time
 import traceback
 
 TVHEADEND_OTA_EPG_GRABBER_WAIT_TIME = 1
-TVHEADEND_OTA_EPG_LAST_TRIGGER_FILENAME = "/var/lib/tvheadend-upcoming-recording-led-indicator/last-epg-check"
+TVHEADEND_OTA_EPG_LAST_TRIGGER_FILENAME = "/var/lib/tvh-dvb-relais-power-control/last-epg-check"
 TVHEADEND_OTA_EPG_LAST_TRIGGER_TIMESTAMP_FORMAT = "%d.%m.%Y %H:%M:%S"
 
 config = configparser.ConfigParser()
-config.read("/etc/tvheadend-upcoming-recording-led-indicator/tvheadend-upcoming-recording-led-indicator.conf")
+config.read("/etc/tvh-dvb-relais-power-control/config.conf")
 
-GPIO_PIN_DVB_DEVICE_REQUIRED_LED = config["gpio"].getint("pin_number_dvb_device_required_led")
+GPIO_PIN_DVB_DEVICE_POWER_RELAY = config["gpio"].getint("pin_number_dvb_device_power_relay")
 GPIO_PIN_ERROR_LED = config["gpio"].getint("pin_number_error_led")
 
 TVHEADEND_URL = config["tvheadend-api"]["url"]
@@ -39,11 +39,11 @@ def logErrorAndLightUpErrorLED(errorMessage):
 	
 	
 def indicateDvbDeviceRequired(isRequired):
-	GPIO.output(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.HIGH if isRequired else GPIO.LOW)
+	GPIO.output(GPIO_PIN_DVB_DEVICE_POWER_RELAY, GPIO.LOW if isRequired else GPIO.HIGH)
 
 
 def setupLogger():
-	logging.basicConfig(filename='/var/log/tvheadend-upcoming-recording-led-indicator/tvheadend-upcoming-recording-led-indicator.log', level = logging.DEBUG, format = "[%(asctime)s] %(message)s.", datefmt = "%Y-%m-%d %H:%M:%S")	
+	logging.basicConfig(filename='/var/log/tvh-dvb-relais-power-control/status.log', level = logging.DEBUG, format = "[%(asctime)s] %(message)s.", datefmt = "%Y-%m-%d %H:%M:%S")	
 
 
 
@@ -169,22 +169,17 @@ def checkForUpcomingOrRunningRecordings():
 	
 class GPIOCleanup():
 	def __enter__(self):
-		logging.info("Setting up GPIOs. DVB device required indicator LED is assigned to pin " + str(GPIO_PIN_DVB_DEVICE_REQUIRED_LED) + ", error indicator LED is assigned to pin " + str(GPIO_PIN_ERROR_LED))
+		logging.info("Setting up GPIOs. DVB device required indicator LED is assigned to pin " + str(GPIO_PIN_DVB_DEVICE_POWER_RELAY) + ", error indicator LED is assigned to pin " + str(GPIO_PIN_ERROR_LED))
 	
 		GPIO.setmode(GPIO.BOARD)
 
-		GPIO.setup(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.OUT)
-		GPIO.setup(GPIO_PIN_ERROR_LED, GPIO.OUT)	
+		GPIO.setup(GPIO_PIN_DVB_DEVICE_POWER_RELAY, GPIO.OUT, initial = GPIO.HIGH)
+		GPIO.setup(GPIO_PIN_ERROR_LED, GPIO.OUT, initial = GPIO.LOW)	
 		
-		GPIO.output(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.LOW)
-		GPIO.output(GPIO_PIN_ERROR_LED, GPIO.LOW)
-
 		logging.info("Finished setting up GPIOs")
 		
 	
 	def __exit__(self, exc_type, exc_val, exc_tb):
-		GPIO.output(GPIO_PIN_DVB_DEVICE_REQUIRED_LED, GPIO.LOW)
-		GPIO.output(GPIO_PIN_ERROR_LED, GPIO.LOW)
 		GPIO.cleanup()
 	
 	
