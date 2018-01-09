@@ -79,13 +79,17 @@ class TVHeadendHelper:
 			else:
 				logging.info("There are no enabled recording entries.")
 				
-		
 				
 		if (dvbDeviceRequired):
 			logging.info("Switching the DVB device relay on.")
+			
 			self.__dvbDeviceHelper.switchOnDvbDevice()
+			self.__waitUntilDvbDeviceIsAvailable()
+			self.__enableDvbDevice()
 		else:
 			logging.info("Switching the DVB device relay off.")
+			
+			self.__disableDvbDevice()
 			self.__dvbDeviceHelper.switchOffDvbDevice()
 			
 			
@@ -96,8 +100,7 @@ class TVHeadendHelper:
 			self.__tryTriggerOtaEpgGrabberUntilSuccessful()
 			
 			
-			
-	def __tryTriggerOtaEpgGrabberUntilSuccessful(self):
+	def __waitUntilDvbDeviceIsAvailable(self):
 		# Wait for a DVB device to be connected
 		while (True):
 			logging.info("Checking whether a DVB input device is available.")
@@ -117,10 +120,14 @@ class TVHeadendHelper:
 				if (self.__exitHelper.isExitRequested()):
 					return
 			
+			
+	def __tryTriggerOtaEpgGrabberUntilSuccessful(self):
+		self.__waitUntilDvbDeviceIsAvailable()
+			
 		# Trigger OTA Grabber and wait
 		logging.info("Triggering OTA EPG grabber.")
 		
-		inputsResponse = requests.get(self.__conf.TVHeadendURL + "/api/epggrab/ota/trigger?trigger=300", auth = (self.__conf.TVHeadendUsername, self.__conf.TVHeadendPassword))
+		inputsResponse = requests.get(self.__conf.TVHeadendURL + "/api/epggrab/ota/trigger?trigger=" + str(self.__conf.TVHeadendOTAEPGGrabberWaitTime), auth = (self.__conf.TVHeadendUsername, self.__conf.TVHeadendPassword))
 
 		logging.info("Waiting " + str(self.__conf.TVHeadendOTAEPGGrabberWaitTime) + " seconds for OTA EPG grabber to complete.")
 		
@@ -145,8 +152,49 @@ class TVHeadendHelper:
 		
 			
 	def __checkIsDvbInputAvailable(self):
-		inputsResponse = requests.get(self.__conf.TVHeadendURL + "/api/status/inputs", auth = (self.__conf.TVHeadendUsername, self.__conf.TVHeadendPassword))
+		rootDvbDevices = self.__retrieveDvbDeviceTree("root")
 		
-		inputsObj = json.loads(inputsResponse.text)
+		return (len(rootDvbDevices) > 0)
 		
-		return (inputsObj["totalCount"] > 0)
+		
+	def __retrieveDvbDeviceTree(self, uuid):
+		dvbDeviceTreeResponse = requests.post(self.__conf.TVHeadendURL + "/api/hardware/tree", auth = (self.__conf.TVHeadendUsername, self.__conf.TVHeadendPassword), data = {"uuid" : uuid})
+		
+		return json.loads(dvbDeviceTreeResponse.text)
+		
+		
+	def __sendDvbDeviceEnableRequest(self, enable):
+		logging.info("Trying to retrieve all root DVB devices.")
+		
+		# First, retrieve all root device nodes
+		rootDvbDevices = self.__retrieveDvbDeviceTree("root")
+		
+		logging.info("Successfully retrieved all root DVB devices.")
+		
+		# Then, retrieve their children
+		for rootDvbDevice in rootDvbDevices:
+			logging.info("Trying to retrieve all child DVB devices for root DVB device with UUID \"" + rootDvbDevice["uuid"] + "\".") 
+			
+			childDvbDevices = self.__retrieveDvbDeviceTree(rootDvbDevice["uuid"])
+			
+			logging.info("Successfully retrieved all child DVB devices for root DVB device with UUID \"" + rootDvbDevice["uuid"] + "\".") 
+			
+			# Enable or disable
+			for childDvbDevice in childDvbDevices:
+				logging.info("Trying to set enabled state to \"" + str(enable) + "\" for child DVB device with UUID \"" + childDvbDevice["uuid"] + "\".")
+				
+				# Set enabled state
+				enableOrDisablePostObject = {"uuid" : childDvbDevice["uuid"], "enabled" : enable}
+				enableOrDisablePostJsonString = json.dumps(enableOrDisablePostObject)	
+						
+				response = requests.post(self.__conf.TVHeadendURL + "/api/idnode/save", auth = (self.__conf.TVHeadendUsername, self.__conf.TVHeadendPassword), data = {"node" : enableOrDisablePostJsonString})
+
+				logging.info("Successfully set enabled state to \"" + str(enable) + "\" for child DVB device with UUID \"" + childDvbDevice["uuid"] + "\".")
+		
+		
+	def __enableDvbDevice(self):
+		self.__sendDvbDeviceEnableRequest(True)
+
+
+	def __disableDvbDevice(self):	
+		self.__sendDvbDeviceEnableRequest(False)
