@@ -1,0 +1,14 @@
+[Unit]
+Description=Switches a relay on or off depending on whether there are upcoming or running recording entries in TVHeadend or not
+After=tvheadend.service
+Requisite=tvheadend.service
+
+[Service]
+ExecStart=/usr/bin/env python3 /usr/local/bin/tvh-dvb-relay-power-control/main.py
+User=tvh-dvb-relay-power-control
+
+[Install]
+WantedBy=multi-user.target
+
+
+
