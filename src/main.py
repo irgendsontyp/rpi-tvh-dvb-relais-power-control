@@ -4,6 +4,7 @@ from dvb_device_helper import DVBDeviceHelper
 from exit_helper import ExitHelper
 from gpio_helper import GPIOHelper
 import logging
+from logging.handlers import RotatingFileHandler
 import signal
 from system_helper import SystemHelper
 import time
@@ -15,7 +16,14 @@ exitHelper = ExitHelper()
 
 
 def setupLogger():
-	logging.basicConfig(filename = "/var/log/tvh-dvb-relay-power-control/status.log", level = logging.DEBUG, format = "[%(asctime)s] %(message)s", datefmt = "%Y-%m-%d %H:%M:%S")	
+	logFormatter = logging.Formatter("[%(asctime)s] %(message)s", "%Y-%m-%d %H:%M:%S")
+	
+	logFileHandler = RotatingFileHandler("/var/log/tvh-dvb-relay-power-control/status.log", maxBytes = 5 * 1024 * 1024, backupCount = 1, encoding = "utf-8")
+	logFileHandler.setFormatter(logFormatter)
+	logFileHandler.setLevel(logging.DEBUG)
+	
+	logging.getLogger().addHandler(logFileHandler)
+	logging.getLogger().setLevel(logging.DEBUG)
 	
 
 def sigIntHandler(signalNumber, stackFrame):
