@@ -162,14 +162,14 @@ def checkForUpcomingOrRunningRecordings():
 		else:
 			logging.info("There are no enabled recording entries")
 			
-	logging.info("Indicating that the DVB device is " + ("required" if dvbDeviceRequired else "not required"))
+	logging.info("Switching the DVB device relay " + ("on" if dvbDeviceRequired else "off"))
 			
 	indicateDvbDeviceRequired(dvbDeviceRequired)
 	
 	
 class GPIOCleanup():
 	def __enter__(self):
-		logging.info("Setting up GPIOs. DVB device required indicator LED is assigned to pin " + str(GPIO_PIN_DVB_DEVICE_POWER_RELAY) + ", error indicator LED is assigned to pin " + str(GPIO_PIN_ERROR_LED))
+		logging.info("Setting up GPIOs. DVB device power relay is assigned to pin " + str(GPIO_PIN_DVB_DEVICE_POWER_RELAY) + ", error indicator LED is assigned to pin " + str(GPIO_PIN_ERROR_LED))
 	
 		GPIO.setmode(GPIO.BOARD)
 
