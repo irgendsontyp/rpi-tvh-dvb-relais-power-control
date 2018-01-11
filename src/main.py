@@ -60,15 +60,10 @@ def main():
 				
 				# Check whether there are upcoming or running recordings
 				tvHeadendHelper.switchDvbDevicePowerDependentOnUpcomingRecordings()
-			
-				loopTimeoutInMilliseconds = conf.MainCheckIntervalSeconds * 1000
-					
-				# Sleep for the configured amount of milliseconds in intervals of 10ms
-				for i in range(1, loopTimeoutInMilliseconds // 10):
-					if (exitHelper.isExitRequested()):
-						break
-						
-					time.sleep(0.01)
+							
+				logging.info("Check done. Waiting " + str(conf.MainCheckIntervalSeconds) + " seconds until the next check.")
+							
+				exitHelper.sleepWhilNotExitRequested(conf.MainCheckIntervalSeconds)
 					
 			except:
 				logging.error("An unrecoverable error occured: " + traceback.format_exc())
