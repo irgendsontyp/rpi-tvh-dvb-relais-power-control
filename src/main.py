@@ -63,7 +63,7 @@ def main():
 							
 				logging.info("Check done. Waiting " + str(conf.MainCheckIntervalSeconds) + " seconds until the next check.")
 							
-				exitHelper.sleepWhilNotExitRequested(conf.MainCheckIntervalSeconds)
+				exitHelper.sleepWhileNotExitRequested(conf.MainCheckIntervalSeconds)
 					
 			except:
 				logging.error("An unrecoverable error occured: " + traceback.format_exc())

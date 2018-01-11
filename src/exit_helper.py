@@ -18,5 +18,5 @@ class ExitHelper:
 		self.__exitEvent.wait()
 
 
-	def sleepWhilNotExitRequested(self, seconds):
+	def sleepWhileNotExitRequested(self, seconds):
 		self.__exitEvent.wait(seconds)

@@ -118,7 +118,7 @@ class TVHeadendHelper:
 			
 			logging.info("No DVB input device is available. Checking again in " + str(self.__conf.DVBInputAvailableCheckIntervalSeconds) + " seconds.")
 					
-			if (self.__exitHelper.sleepWhilNotExitRequested(self.__conf.DVBInputAvailableCheckIntervalSeconds)):
+			if (self.__exitHelper.sleepWhileNotExitRequested(self.__conf.DVBInputAvailableCheckIntervalSeconds)):
 				return
 			
 			
@@ -132,7 +132,7 @@ class TVHeadendHelper:
 
 		logging.info("Waiting " + str(self.__conf.TVHeadendOTAEPGGrabberWaitTime) + " seconds for OTA EPG grabber to complete.")
 			
-		if (self.__exitHelper.sleepWhilNotExitRequested(self.__conf.TVHeadendOTAEPGGrabberWaitTime)):
+		if (self.__exitHelper.sleepWhileNotExitRequested(self.__conf.TVHeadendOTAEPGGrabberWaitTime)):
 			return
 	
 		logging.info("Waiting for OTA EPG grabber has finished.")
