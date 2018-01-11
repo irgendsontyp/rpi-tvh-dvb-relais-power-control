@@ -52,9 +52,7 @@ def main():
 	
 	systemHelper = SystemHelper()
 	
-	with GPIOHelper(conf) as gpioHelper, DVBDeviceHelper(gpioHelper, systemHelper) as dvbDeviceHelper:
-		tvHeadendHelper = TVHeadendHelper(conf, dvbDeviceHelper, exitHelper)
-
+	with GPIOHelper(conf) as gpioHelper, DVBDeviceHelper(gpioHelper, systemHelper) as dvbDeviceHelper, TVHeadendHelper(conf, dvbDeviceHelper, exitHelper) as tvHeadendHelper:
 		while (not exitHelper.isExitRequested()):
 			try:
 				# Trigger OTA EPG grabber if required

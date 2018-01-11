@@ -15,6 +15,14 @@ class TVHeadendHelper:
 		self.__tvHeadendOtaEpgLastTriggerTimestampFormat = "%d.%m.%Y %H:%M:%S"
 	
 	
+	def __enter__(self):
+		return self
+		
+		
+	def __exit__(self, exc_type, exc_value, traceback):
+		self.__disableDvbDevice()
+	
+	
 	def checkEpgTriggerRequired(self):
 		logging.info("Checking whether OTA EPG grabber must be triggered.")
 		
