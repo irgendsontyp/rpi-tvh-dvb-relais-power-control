@@ -83,9 +83,7 @@ class TVHeadendHelper:
 		if (dvbDeviceRequired):
 			logging.info("Switching the DVB device relay on.")
 			
-			self.__dvbDeviceHelper.switchOnDvbDevice()
-			self.__waitUntilDvbDeviceIsAvailable()
-			self.__enableDvbDevice()
+			self.__switchOnAndEnableDvbDevice()
 		else:
 			logging.info("Switching the DVB device relay off.")
 			
@@ -95,7 +93,7 @@ class TVHeadendHelper:
 			
 	def triggerOtaEpgGrabberIfRequired(self):
 		if self.checkEpgTriggerRequired():
-			self.__dvbDeviceHelper.switchOnDvbDevice()
+			self.__switchOnAndEnableDvbDevice()
 			
 			self.__tryTriggerOtaEpgGrabberUntilSuccessful()
 			
@@ -192,7 +190,9 @@ class TVHeadendHelper:
 				logging.info("Successfully set enabled state to \"" + str(enable) + "\" for child DVB device with UUID \"" + childDvbDevice["uuid"] + "\".")
 		
 		
-	def __enableDvbDevice(self):
+	def __switchOnAndEnableDvbDevice(self):
+		self.__dvbDeviceHelper.switchOnDvbDevice()
+		self.__waitUntilDvbDeviceIsAvailable()
 		self.__sendDvbDeviceEnableRequest(True)
 
 
