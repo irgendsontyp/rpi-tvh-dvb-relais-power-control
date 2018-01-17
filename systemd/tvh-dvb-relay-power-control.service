@@ -4,7 +4,7 @@ After=tvheadend.service
 Requisite=tvheadend.service
 
 [Service]
-ExecStart=/usr/bin/env python3 /usr/local/bin/tvh-dvb-relay-power-control/main.py
+ExecStart=/usr/local/bin/tvh-dvb-relay-power-control/env/bin/python -m rpitvhdvbrelaypowercontrol
 User=tvh-dvb-relay-power-control
 
 [Install]

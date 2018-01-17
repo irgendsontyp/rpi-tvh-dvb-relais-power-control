@@ -1,18 +1,18 @@
-from config import Config
+from .config import Config
 import datetime
-from dvb_device_helper import DVBDeviceHelper
-from exit_helper import ExitHelper
-from gpio_helper import GPIOHelper
+from .dvb_device_helper import DVBDeviceHelper
+from irgendsontyphelpers.application_exit_helper import ApplicationExitHelper
+from .gpio_helper import GPIOHelper
 import logging
 from logging.handlers import RotatingFileHandler
 import signal
-from system_helper import SystemHelper
+from .system_helper import SystemHelper
 import time
 import traceback
-from tvheadend_helper import TVHeadendHelper
+from .tvheadend_helper import TVHeadendHelper
 
 
-exitHelper = ExitHelper()
+applicationExitHelper = ApplicationExitHelper()
 
 
 def setupLogger():
@@ -28,12 +28,12 @@ def setupLogger():
 
 def sigIntHandler(signalNumber, stackFrame):
 	logging.info("Received signal SIGINT. Requesting application exit.")
-	exitHelper.requestExit()
+	applicationExitHelper.requestExit()
 	
 
 def sigTermHandler(signalNumber, stackFrame):
 	logging.info("Received signal SIGTERM. Requesting application exit.")
-	exitHelper.requestExit()
+	applicationExitHelper.requestExit()
 
 
 def main():		
@@ -52,8 +52,8 @@ def main():
 	
 	systemHelper = SystemHelper()
 	
-	with GPIOHelper(conf) as gpioHelper, DVBDeviceHelper(gpioHelper, systemHelper) as dvbDeviceHelper, TVHeadendHelper(conf, dvbDeviceHelper, exitHelper) as tvHeadendHelper:
-		while (not exitHelper.isExitRequested()):
+	with GPIOHelper(conf) as gpioHelper, DVBDeviceHelper(gpioHelper, systemHelper) as dvbDeviceHelper, TVHeadendHelper(conf, dvbDeviceHelper, applicationExitHelper) as tvHeadendHelper:
+		while (not applicationExitHelper.isExitRequested()):
 			try:
 				# Trigger OTA EPG grabber if required
 				tvHeadendHelper.triggerOtaEpgGrabberIfRequired()
@@ -63,14 +63,15 @@ def main():
 							
 				logging.info("Check done. Waiting " + str(conf.MainCheckIntervalSeconds) + " seconds until the next check.")
 							
-				exitHelper.sleepWhileNotExitRequested(conf.MainCheckIntervalSeconds)
+				applicationExitHelper.sleepWhileNotExitRequested(conf.MainCheckIntervalSeconds)
 					
 			except:
 				logging.error("An unrecoverable error occured: " + traceback.format_exc())
 				gpioHelper.switchOnErrorLED()
 				
 				# Wait for the user to stop the application so he can see the red LED and react accordingly
-				exitHelper.waitForExitRequest()
+				applicationExitHelper.waitForExitRequest()
 		
 # run
-main()
+if (__name__ == "__main__"):
+	main()
