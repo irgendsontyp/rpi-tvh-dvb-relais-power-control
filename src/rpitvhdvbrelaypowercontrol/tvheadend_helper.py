@@ -6,10 +6,10 @@ import time
 
 
 class TVHeadendHelper:
-	def __init__(self, conf, dvbDeviceHelper, exitHelper):
+	def __init__(self, conf, dvbDeviceHelper, applicationExitHelper):
 		self.__conf = conf
 		self.__dvbDeviceHelper = dvbDeviceHelper
-		self.__exitHelper = exitHelper
+		self.__applicationExitHelper = applicationExitHelper
 		
 		self.__tvHeadendOtaEpgLastTriggerFilename = "/var/lib/tvh-dvb-relay-power-control/last-epg-check"
 		self.__tvHeadendOtaEpgLastTriggerTimestampFormat = "%d.%m.%Y %H:%M:%S"
@@ -108,7 +108,7 @@ class TVHeadendHelper:
 			
 	def __waitUntilDvbDeviceIsAvailable(self):
 		# Wait for a DVB device to be connected
-		while (not self.__exitHelper.isExitRequested()):
+		while (not self.__applicationExitHelper.isExitRequested()):
 			logging.info("Checking whether a DVB input device is available.")
 			
 			if (self.__checkIsDvbInputAvailable()):
@@ -118,7 +118,7 @@ class TVHeadendHelper:
 			
 			logging.info("No DVB input device is available. Checking again in " + str(self.__conf.DVBInputAvailableCheckIntervalSeconds) + " seconds.")
 					
-			if (self.__exitHelper.sleepWhileNotExitRequested(self.__conf.DVBInputAvailableCheckIntervalSeconds)):
+			if (self.__applicationExitHelper.sleepWhileNotExitRequested(self.__conf.DVBInputAvailableCheckIntervalSeconds)):
 				return
 			
 			
@@ -132,7 +132,7 @@ class TVHeadendHelper:
 
 		logging.info("Waiting " + str(self.__conf.TVHeadendOTAEPGGrabberWaitTime) + " seconds for OTA EPG grabber to complete.")
 			
-		if (self.__exitHelper.sleepWhileNotExitRequested(self.__conf.TVHeadendOTAEPGGrabberWaitTime)):
+		if (self.__applicationExitHelper.sleepWhileNotExitRequested(self.__conf.TVHeadendOTAEPGGrabberWaitTime)):
 			return
 	
 		logging.info("Waiting for OTA EPG grabber has finished.")
