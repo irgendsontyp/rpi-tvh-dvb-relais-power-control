@@ -6,12 +6,12 @@ import time
 
 
 class TVHeadendHelper:
-	def __init__(self, conf, dvbDeviceHelper, applicationExitHelper):
+	def __init__(self, lastEpgCheckFilename, conf, dvbDeviceHelper, applicationExitHelper):
 		self.__conf = conf
 		self.__dvbDeviceHelper = dvbDeviceHelper
 		self.__applicationExitHelper = applicationExitHelper
 		
-		self.__tvHeadendOtaEpgLastTriggerFilename = "/var/lib/tvh-dvb-relay-power-control/last-epg-check"
+		self.__tvHeadendOtaEpgLastTriggerFilename = lastEpgCheckFilename
 		self.__tvHeadendOtaEpgLastTriggerTimestampFormat = "%d.%m.%Y %H:%M:%S"
 	
 	
