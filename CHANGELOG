@@ -1,2 +1,6 @@
+## [1.1.0] - 20.01.2018
+- Implement a debug mode which reads and creates files in the folder ./debug
+
+
 ## [1.0.0] - 17.01.2018
 - First release
